@@ -683,6 +683,30 @@
             }
         }
 
+        // --- 📅【新規追加】日付ナビゲーション用の関数群 ---
+        // 前日・翌日ボタンが押されたとき
+        async function moveDate(offset) {
+            if (!currentTargetDateStr) return;
+            const current = new Date(currentTargetDateStr);
+            current.setDate(current.getDate() + offset);
+            await loadPage(formatDateKey(current));
+        }
+
+        // カレンダー（デートピッカー）で日付が選択されたとき
+        async function onDatePickerChange(picker) {
+            if (picker.value) {
+                await loadPage(picker.value);
+            }
+        }
+
+        // 「今日へ」ボタンが押されたとき
+        async function jumpToToday() {
+            const now = new Date();
+            const adjusted = getAM5AdjustedDate(now);
+            await loadPage(formatDateKey(adjusted));
+        }
+        // ------------------------------------------------
+
         // 画面への描画
         function renderPageForm() {
             const data = currentDayState.dailyLog || {};
@@ -712,7 +736,7 @@
             document.getElementById("wakeup-time").value = formattedTime;
             // ------------------------------------------------
 
-            // その他の身体データなど
+            // その端の身体データなど
             document.getElementById("weight").value = data.weight || "";
             document.getElementById("bodyfat").value = data.bodyfat || "";
             document.getElementById("steps").value = data.steps || "";
@@ -852,6 +876,14 @@
             }
             // 見た目の反映と、突発タスクの場合は点数入力枠の再描画のためにリストをリフレッシュ
             renderPoolTasks();
+        }
+
+        // 💡 トースト表示用の簡易関数（データロード時のセーフティ用）
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.style.display = "block";
+            setTimeout(() => { toast.style.display = "none"; }, 2000);
         }
 
         // ページ読み込み時に初期化を実行
