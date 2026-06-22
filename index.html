@@ -687,33 +687,32 @@
         function renderPageForm() {
             const data = currentDayState.dailyLog || {};
             
-            // 基本ステータス
-if (data.wakeupTime) {
-    console.log("デバッグ用（スプシから届いた起床時間）:", data.wakeupTime);
-    
-    let timeStr = "";
-    
-    // 日付オブジェクトとして解析する
-    const t = new Date(data.wakeupTime);
-    
-    if (!isNaN(t.getTime())) {
-        // スプシの日付データ（1899-12-29T22:50:00.000Zなど）を日本時間に変換
-        // 22:50 に 9時間が足されて、翌日の 07:50 になります
-        const hours = String(t.getHours()).padStart(2, '0');
-        const minutes = String(t.getMinutes()).padStart(2, '0');
-        timeStr = `${hours}:${minutes}`;
-    }
-    
-    // 最終的に有効な "hh:mm" が作れたらセット、ダメならデフォルト値
-    if (timeStr && timeStr !== "NaN:NaN") {
-        document.getElementById("wakeup-time").value = timeStr;
-    } else {
-        document.getElementById("wakeup-time").value = "08:30";
-    }
-} else {
-    document.getElementById("wakeup-time").value = "08:30";
-}
+            // --- ⏰ 起床時間の超強力な復元処理（バグ修正） ---
+            let formattedTime = "08:30"; // デフォルト値
 
+            if (data.wakeupTime) {
+                // スプシから "1899-12-29T22:50:00.000Z" のようなISO文字列や日付オブジェクトが届いた場合
+                const t = new Date(data.wakeupTime);
+                
+                if (!isNaN(t.getTime())) {
+                    // 【重要】1899年のバグデータは時差(JST)の影響でズレるため、ローカルの時間・分をそのまま引っこ抜きます
+                    const hh = String(t.getHours()).padStart(2, '0');
+                    const mm = String(t.getMinutes()).padStart(2, '0');
+                    formattedTime = `${hh}:${mm}`;
+                } else if (typeof data.wakeupTime === "string" && data.wakeupTime.includes(":")) {
+                    // もしすでに "7:50" などの文字列で届いていた場合のセーフティ
+                    const parts = data.wakeupTime.split(':');
+                    const hh = parts[0].trim().padStart(2, '0');
+                    const mm = parts[1].trim().substring(0, 2).padStart(2, '0');
+                    formattedTime = `${hh}:${mm}`;
+                }
+            }
+            
+            // 確定した時間をフォームにセット！
+            document.getElementById("wakeup-time").value = formattedTime;
+            // ------------------------------------------------
+
+            // その他の身体データなど
             document.getElementById("weight").value = data.weight || "";
             document.getElementById("bodyfat").value = data.bodyfat || "";
             document.getElementById("steps").value = data.steps || "";
@@ -749,12 +748,11 @@ if (data.wakeupTime) {
                 html += `<div class="checkbox-list">`;
                 
                 tasks.forEach(task => {
-                    // スプシの実績データから、このタスクがあるか探す
                     const savedReg = currentDayState.regulars.find(r => r.taskName === task.name);
                     const isChecked = savedReg ? savedReg.completed : false;
                     const memoVal = savedReg ? savedReg.memo : "";
                     
-                    originalRegularsCheckedStatus[task.name] = isChecked; // 初期の状態を記憶
+                    originalRegularsCheckedStatus[task.name] = isChecked;
                     
                     const isCompletedClass = isChecked ? "completed" : "";
                     const checkedAttr = isChecked ? "checked" : "";
