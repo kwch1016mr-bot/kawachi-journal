@@ -337,7 +337,7 @@
         }
         .condition-label i { color: #8b5cf6; }
         .condition-memo-input {
-            border: 2px solid #000000 !important; 
+            border: 2px solid #000000 !important;
             border-radius: 4px;
             padding: 7px 10px;
             width: 100%;
@@ -434,7 +434,8 @@
             display: none;
         }
         .spinner {
-            width: 50px; height: 50px;
+            width: 50px;
+            height: 50px;
             border: 5px solid #cbd5e1;
             border-top: 5px solid #3b82f6;
             border-radius: 50%;
@@ -535,15 +536,13 @@
             </section>
 
             <h3 class="section-title"><i class="fa-solid fa-rotate"></i> レギュラータスク</h3>
-            <div id="regular-tasks-container">
-                </div>
+            <div id="regular-tasks-container"></div>
 
             <div class="section-title">
                 <span><i class="fa-solid fa-bolt"></i> 突発タスク・やりたいこと</span>
             </div>
             <div class="card">
-                <div class="checkbox-list" id="urgent-tasks-list">
-                    </div>
+                <div class="checkbox-list" id="urgent-tasks-list"></div>
                 <div class="add-task-form">
                     <input type="text" id="new-urgent-input" placeholder="新しい突発タスクを入力...">
                     <button class="btn btn-primary" onclick="addUrgentTask()">追加</button>
@@ -555,15 +554,14 @@
                 <textarea id="diary-memo" placeholder="今日のできごとやアイデアを自由にメモしよう..."></textarea>
             </div>
 
-         </main>
+        </main>
 
         <aside class="want-list-sidebar">
             <h3 class="section-title">
                 <span><i class="fa-regular fa-lightbulb"></i> wantリスト</span>
             </h3>
             <div class="card" style="background-color: #fafaf9;">
-                <div class="checkbox-list" id="want-tasks-list">
-                    </div>
+                <div class="checkbox-list" id="want-tasks-list"></div>
                 <div class="add-task-form" style="margin-top:15px;">
                     <input type="text" id="new-want-input" placeholder="新しいWANTを入力...">
                     <button class="btn btn-primary btn-sm" onclick="addWantTask()">追加</button>
@@ -638,7 +636,7 @@
             showLoading("マスタデータを読み込み中...");
             try {
                 // 1. レギュラータスクマスタの取得
-                const response = await fetch(`${GAS_WEB_APP_URL}?action=init&date=2026-01-01`); // 疎通ダミー日
+                const response = await fetch(`${GAS_WEB_APP_URL}?action=init&date=2026-01-01`);
                 const result = await response.json();
                 if (result.success) {
                     regularTaskMasters = result.masters;
@@ -664,7 +662,6 @@
             claimedRewardThisTurn = null; // リセット
 
             showLoading(`${dateStr} のデータを同期中...`);
-
             try {
                 const response = await fetch(`${GAS_WEB_APP_URL}?action=loadDay&date=${dateStr}`);
                 const result = await response.json();
@@ -683,7 +680,6 @@
             }
         }
 
-        // --- 📅【新規追加】日付ナビゲーション用の関数群 ---
         // 前日・翌日ボタンが押されたとき
         async function moveDate(offset) {
             if (!currentTargetDateStr) return;
@@ -705,26 +701,20 @@
             const adjusted = getAM5AdjustedDate(now);
             await loadPage(formatDateKey(adjusted));
         }
-        // ------------------------------------------------
 
         // 画面への描画
         function renderPageForm() {
             const data = currentDayState.dailyLog || {};
             
-            // --- ⏰ 起床時間の超強力な復元処理（バグ修正） ---
-            let formattedTime = "08:30"; // デフォルト値
-
+            // 起床時間の復元処理
+            let formattedTime = "08:30";
             if (data.wakeupTime) {
-                // スプシから "1899-12-29T22:50:00.000Z" のようなISO文字列や日付オブジェクトが届いた場合
                 const t = new Date(data.wakeupTime);
-                
                 if (!isNaN(t.getTime())) {
-                    // 【重要】1899年のバグデータは時差(JST)の影響でズレるため、ローカルの時間・分をそのまま引っこ抜きます
                     const hh = String(t.getHours()).padStart(2, '0');
                     const mm = String(t.getMinutes()).padStart(2, '0');
                     formattedTime = `${hh}:${mm}`;
                 } else if (typeof data.wakeupTime === "string" && data.wakeupTime.includes(":")) {
-                    // もしすでに "7:50" などの文字列で届いていた場合のセーフティ
                     const parts = data.wakeupTime.split(':');
                     const hh = parts[0].trim().padStart(2, '0');
                     const mm = parts[1].trim().substring(0, 2).padStart(2, '0');
@@ -732,11 +722,8 @@
                 }
             }
             
-            // 確定した時間をフォームにセット！
             document.getElementById("wakeup-time").value = formattedTime;
-            // ------------------------------------------------
 
-            // その端の身体データなど
             document.getElementById("weight").value = data.weight || "";
             document.getElementById("bodyfat").value = data.bodyfat || "";
             document.getElementById("steps").value = data.steps || "";
@@ -751,18 +738,16 @@
             // ライフポイントの表示
             document.getElementById("lifepoint-display").innerHTML = `${currentDayState.totalPoints} <span class="lifepoint-unit">pt</span>`;
 
-            // --- レギュラータスクの描画 ---
+            // レギュラータスクの描画
             const container = document.getElementById("regular-tasks-container");
             container.innerHTML = "";
 
-            // カテゴリごとにグループ化
             const groups = {};
             regularTaskMasters.forEach(m => {
                 if (!groups[m.category]) groups[m.category] = [];
                 groups[m.category].push(m);
             });
-
-            originalRegularsCheckedStatus = {}; // チェック判定用リセット
+            originalRegularsCheckedStatus = {};
 
             for (const [categoryName, tasks] of Object.entries(groups)) {
                 const card = document.createElement("div");
@@ -770,12 +755,11 @@
                 
                 let html = `<div class="task-group-title">${categoryName}</div>`;
                 html += `<div class="checkbox-list">`;
-                
                 tasks.forEach(task => {
                     const savedReg = currentDayState.regulars.find(r => r.taskName === task.name);
                     const isChecked = savedReg ? savedReg.completed : false;
                     const memoVal = savedReg ? savedReg.memo : "";
-                    
+                 
                     originalRegularsCheckedStatus[task.name] = isChecked;
                     
                     const isCompletedClass = isChecked ? "completed" : "";
@@ -797,7 +781,6 @@
                 container.appendChild(card);
             }
 
-            // --- 突発・WANTタスクの描画 ---
             renderPoolTasks();
         }
 
@@ -817,7 +800,6 @@
                 const label = document.createElement("label");
                 label.className = `checkbox-item ${isCompletedClass}`;
                 
-                // チェックされたら点数入力フォームを表示
                 const pointInputHtml = task.completed 
                     ? `<input type="number" class="pool-task-point-input" value="${task.point || 5}" onchange="updatePoolTaskPoint('${task.id}', this.value)" onclick="event.stopPropagation();"> 点`
                     : `<span style="font-size:0.8rem; color:#94a3b8;">完了時に点数入力</span>`;
@@ -869,21 +851,203 @@
             const task = list.find(t => t.id === id);
             if (task) {
                 task.completed = checkbox.checked;
-                // 突発タスクに新しくチェックが入ったら初期点数5を設定
                 if (type === "urgent" && checkbox.checked && !task.point) {
                     task.point = 5;
                 }
             }
-            // 見た目の反映と、突発タスクの場合は点数入力枠の再描画のためにリストをリフレッシュ
             renderPoolTasks();
         }
 
-        // 💡 トースト表示用の簡易関数（データロード時のセーフティ用）
+        // 💡 トースト表示用の簡易関数
         function showToast(message) {
             const toast = document.getElementById("toast");
             toast.innerText = message;
             toast.style.display = "block";
             setTimeout(() => { toast.style.display = "none"; }, 2000);
+        }
+
+        /* --------------------------------------------------
+         * 🛠️ 【ここから新規追加・バグ修正用の関数群】
+         * -------------------------------------------------- */
+
+        // ③ 「現在時刻」ボタン：今の時間を「HH:MM」形式でセットする
+        function setNowTime() {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById("wakeup-time").value = `${hh}:${mm}`;
+            showToast("現在時刻をセットしました");
+        }
+
+        // ② 「コピー」ボタン：現在のログをいい感じのテキストにしてクリップボードにコピー
+        function copyToClipboard() {
+            const dateText = document.getElementById("date-display").innerText;
+            const wakeup = document.getElementById("wakeup-time").value;
+            const weight = document.getElementById("weight").value || "未入力";
+            const bodyfat = document.getElementById("bodyfat").value || "未入力";
+            const steps = document.getElementById("steps").value || "0";
+            const condition = document.getElementById("condition-select").value;
+            const conditionMemo = document.getElementById("condition-memo").value;
+            const slogan = document.getElementById("slogan-display").innerText;
+            const diary = document.getElementById("diary-memo").value || "なし";
+
+            let text = `📅 【ジャーナル】 ${dateText}\n`;
+            text += `-------------------------\n`;
+            text += `🎯 スローガン: ${slogan}\n`;
+            text += `⏰ 起床時間: ${wakeup}\n`;
+            text += `🏃 体重: ${weight}kg / 体脂肪: ${bodyfat}% / 歩数: ${steps}歩\n`;
+            text += `😊 体調: ${"⭐".repeat(condition)} (${conditionMemo || 'メモなし'})\n\n`;
+            text += `📝 ひとこと日記:\n${diary}\n`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("クリップボードにコピーしました！");
+            }).catch(err => {
+                console.error("コピー失敗: ", err);
+                alert("コピーに失敗しました。手動で選択してコピーしてください。");
+            });
+        }
+
+        // ① 「登録（スプシ保存）」ボタン：現在のフォーム内容をオブジェクトにまとめてGASへ送信
+        async function saveDataToSpreadsheet() {
+            if (!currentTargetDateStr) return;
+
+            showLoading("スプレッドシートに保存中...");
+
+            // 画面の入力値をcurrentDayStateに収集
+            const dailyLog = {
+                date: currentTargetDateStr,
+                wakeupTime: document.getElementById("wakeup-time").value,
+                weight: parseFloat(document.getElementById("weight").value) || null,
+                bodyfat: parseFloat(document.getElementById("bodyfat").value) || null,
+                steps: parseInt(document.getElementById("steps").value) || 0,
+                condition: document.getElementById("condition-select").value,
+                conditionMemo: document.getElementById("condition-memo").value,
+                slogan: document.getElementById("slogan-display").innerText,
+                diaryMemo: document.getElementById("diary-memo").value
+            };
+
+            // レギュラータスクの状態を収集
+            const regulars = [];
+            const regElements = document.querySelectorAll(".regular-todo-item");
+            regElements.forEach(el => {
+                const taskName = el.dataset.taskname;
+                const memoEl = document.querySelector(`.regular-task-memo[data-taskname="${taskName}"]`);
+                regulars.push({
+                    taskName: taskName,
+                    completed: el.checked,
+                    memo: memoEl ? memoEl.value : ""
+                });
+            });
+
+            // 送信データの組み立て
+            const payload = {
+                date: currentTargetDateStr,
+                dailyLog: dailyLog,
+                regulars: regulars,
+                urgents: currentDayState.urgents || [],
+                wants: currentDayState.wants || [],
+                claimedReward: claimedRewardThisTurn
+            };
+
+            try {
+                // GASのdoPostにデータを送信
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast("スプレッドシートに保存しました！");
+                    // 最新のポイントなどを再反映させるため再ロード
+                    await loadPage(currentTargetDateStr);
+                } else {
+                    alert("保存エラー: " + result.error);
+                }
+            } catch (e) {
+                console.error(e);
+                alert("GASとの保存通信に失敗しました。");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // 【その他補完機能】突発タスク追加
+        function addUrgentTask() {
+            const input = document.getElementById("new-urgent-input");
+            if (!input.value.trim()) return;
+            
+            const newTask = {
+                id: "u_" + Date.now(),
+                text: input.value.trim(),
+                completed: false,
+                point: 5
+            };
+            if(!currentDayState.urgents) currentDayState.urgents = [];
+            currentDayState.urgents.push(newTask);
+            input.value = "";
+            renderPoolTasks();
+            showToast("突発タスクを追加しました（保存ボタンで確定）");
+        }
+
+        // 【その他補完機能】WANTタスク追加
+        function addWantTask() {
+            const input = document.getElementById("new-want-input");
+            if (!input.value.trim()) return;
+
+            const newTask = {
+                id: "w_" + Date.now(),
+                text: input.value.trim(),
+                completed: false
+            };
+            if(!currentDayState.wants) currentDayState.wants = [];
+            currentDayState.wants.push(newTask);
+            input.value = "";
+            renderPoolTasks();
+            showToast("WANTリストに追加しました（保存ボタンで確定）");
+        }
+
+        // 【その他補完機能】突発タスクの点数更新
+        function updatePoolTaskPoint(id, val) {
+            const task = currentDayState.urgents.find(t => t.id === id);
+            if (task) {
+                task.point = parseInt(val) || 0;
+            }
+        }
+
+        // 【その他補完機能】スローガンの編集切り替え
+        function toggleSloganEdit() {
+            const textEl = document.getElementById("slogan-display");
+            const formEl = document.getElementById("slogan-edit-form");
+            const btnEl = document.getElementById("btn-edit-slogan");
+
+            if (formEl.style.display === "flex") {
+                formEl.style.display = "none";
+                btnEl.innerText = "更新する";
+            } else {
+                formEl.style.display = "flex";
+                btnEl.innerText = "キャンセル";
+            }
+        }
+
+        // 【その他補完機能】スローガンの決定
+        function saveSlogan() {
+            const inputVal = document.getElementById("slogan-input").value;
+            document.getElementById("slogan-display").innerText = inputVal;
+            toggleSloganEdit();
+            showToast("スローガンを変更しました（保存ボタンで確定）");
+        }
+
+        // 【その他補完機能】ご褒美の交換
+        function claimReward(rewardName, cost) {
+            if (currentDayState.totalPoints < cost) {
+                alert(`ポイントが足りません！ (保有: ${currentDayState.totalPoints}pt / 必要: ${cost}pt)`);
+                return;
+            }
+            if (confirm(`【${rewardName}】を ${cost}pt で交換しますか？`)) {
+                claimedRewardThisTurn = { name: rewardName, cost: cost };
+                alert(`🎉 交換を受け付けました！「登録（スプシ保存）」ボタンを押すとポイントが消費され確定します。`);
+            }
         }
 
         // ページ読み込み時に初期化を実行
