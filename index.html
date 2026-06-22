@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>かわちくんJOURNAL (スプシ同期版)</title>
-    <!-- Google Fonts & Font Awesome -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -450,7 +449,6 @@
 </head>
 <body>
 
-    <!-- 通信中画面 -->
     <div class="loading-overlay" id="loading-view">
         <div class="spinner"></div>
         <div id="loading-text">スプレッドシートと通信中...</div>
@@ -458,12 +456,8 @@
 
     <div class="app-split-container">
 
-        <!-- ==================================================
-             【左側】デイリーログ メインエリア
-             ================================================== -->
         <main class="daily-log-area">
 
-            <!-- 行1: 日付ナビゲーション -->
             <header class="row-header">
                 <div class="date-navigation">
                     <button class="btn" onclick="moveDate(-1)"><i class="fa-solid fa-chevron-left"></i> 前日</button>
@@ -478,7 +472,6 @@
                 </div>
             </header>
 
-            <!-- 行2: 起床時間 ＆ ライフポイント -->
             <section class="row-status">
                 <div class="wakeup-box">
                     <span class="wakeup-label"><i class="fa-regular fa-clock"></i> 起床時間</span>
@@ -492,7 +485,6 @@
                 </div>
             </section>
 
-            <!-- 行3: 身体データ -->
             <section class="body-data-card">
                 <div class="body-data-header">
                     <i class="fa-solid fa-person-running"></i> 身体データ
@@ -513,7 +505,6 @@
                 </div>
             </section>
 
-            <!-- 行4: 体調 -->
             <section class="condition-row">
                 <div class="data-field">
                     <span class="condition-label"><i class="fa-regular fa-face-smile"></i> 体調（5段階）</span>
@@ -531,7 +522,6 @@
                 </div>
             </section>
 
-            <!-- 行5: スローガン -->
             <section class="slogan-card">
                 <div class="slogan-header-wrap">
                     <div class="slogan-header"><i class="fa-solid fa-bullseye"></i> 現在の目標・スローガン</div>
@@ -544,59 +534,48 @@
                 </div>
             </section>
 
-            <!-- レギュラータスクマスタ表示枠 -->
             <h3 class="section-title"><i class="fa-solid fa-rotate"></i> レギュラータスク</h3>
             <div id="regular-tasks-container">
-                <!-- スプシのマスタデータから動的に生成 -->
-            </div>
+                </div>
 
-            <!-- 突発タスク -->
             <div class="section-title">
                 <span><i class="fa-solid fa-bolt"></i> 突発タスク・やりたいこと</span>
             </div>
             <div class="card">
                 <div class="checkbox-list" id="urgent-tasks-list">
-                    <!-- 動的生成 -->
-                </div>
+                    </div>
                 <div class="add-task-form">
                     <input type="text" id="new-urgent-input" placeholder="新しい突発タスクを入力...">
                     <button class="btn btn-primary" onclick="addUrgentTask()">追加</button>
                 </div>
             </div>
 
-            <!-- 日記メモ -->
             <h3 class="section-title"><i class="fa-regular fa-pen-to-square"></i> ひとこと日記</h3>
             <div class="card">
                 <textarea id="diary-memo" placeholder="今日のできごとやアイデアを自由にメモしよう..."></textarea>
             </div>
 
-        </main>
+         </main>
 
-        <!-- ==================================================
-             【右側】WANTリスト & ご褒美ショップサイドバー
-             ================================================== -->
         <aside class="want-list-sidebar">
             <h3 class="section-title">
                 <span><i class="fa-regular fa-lightbulb"></i> wantリスト</span>
             </h3>
             <div class="card" style="background-color: #fafaf9;">
                 <div class="checkbox-list" id="want-tasks-list">
-                    <!-- 動的生成 -->
-                </div>
+                    </div>
                 <div class="add-task-form" style="margin-top:15px;">
                     <input type="text" id="new-want-input" placeholder="新しいWANTを入力...">
                     <button class="btn btn-primary btn-sm" onclick="addWantTask()">追加</button>
                 </div>
             </div>
 
-            <!-- ご褒美ショップ（ポイント消費）機能 -->
             <h3 class="section-title">
                 <span><i class="fa-solid fa-gift"></i> ご褒美ショップ</span>
             </h3>
             <div class="card" style="background-color: #fefce8; border-color: #fef08a;">
                 <div style="font-size:0.85rem; color:#71716a; margin-bottom:10px;">貯まったポイントをご褒美と交換！</div>
                 <div class="checkbox-list" id="reward-shop-list">
-                    <!-- 固定 or 動的（今回は仮でいくつか表示し、消費履歴に飛ばします） -->
                     <button class="btn btn-sm btn-primary" style="justify-content:space-between;" onclick="claimReward('スタバの抹茶フラペチーノ飲む', 50)">🥤 抹茶フラペチーノ (50pt)</button>
                     <button class="btn btn-sm btn-primary" style="justify-content:space-between; margin-top:5px;" onclick="claimReward('コミック新刊購入', 100)">📚 コミック新刊購入 (100pt)</button>
                     <button class="btn btn-sm btn-primary" style="justify-content:space-between; margin-top:5px;" onclick="claimReward('ルピシアのマグポット買う', 150)">🫖 ルピシアのマグポット (150pt)</button>
@@ -608,12 +587,9 @@
 
     <div class="toast-message" id="toast">保存しました</div>
 
-    <!-- ==================================================
-         5. アプリのコアJavaScript（GAS連携）
-         ================================================== -->
     <script>
         // ⚠️【最重要】ここにGASでデプロイした「ウェブアプリのURL」を貼り付けてください！
-        const GAS_WEB_APP_URL = 'ここにコピーしたウェブアプリのURLを貼り付ける';
+        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzegB52gszaE9hjwvaPZ0K0YiEuaMFn50gLYd4sT07pdHhkini5xWlCFcQP5dC_n5tz/exec';
 
         // アプリ内状態管理変数
         let currentTargetDateStr = "";
@@ -712,17 +688,32 @@
             const data = currentDayState.dailyLog || {};
             
             // 基本ステータス
-            if (data.wakeupTime) {
-                  // スプシから届く「7:50:00」や日付オブジェクトを「07:50」の形式に綺麗に整える
-                  //   const t = new Date(data.wakeupTime);
-                  //   if (!isNaN(t.getTime())) {
-                  //     document.getElementById("wakeup-time").value = `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
-                  //   } else if (typeof data.wakeupTime === "string") {
-                  //     document.getElementById("wakeup-time").value = data.wakeupTime.substring(0, 5);
-                    }
-                } else {
-                      document.getElementById("wakeup-time").value = "08:30";
-                    }
+if (data.wakeupTime) {
+    console.log("デバッグ用（スプシから届いた起床時間）:", data.wakeupTime);
+    
+    let timeStr = "";
+    
+    // 日付オブジェクトとして解析する
+    const t = new Date(data.wakeupTime);
+    
+    if (!isNaN(t.getTime())) {
+        // スプシの日付データ（1899-12-29T22:50:00.000Zなど）を日本時間に変換
+        // 22:50 に 9時間が足されて、翌日の 07:50 になります
+        const hours = String(t.getHours()).padStart(2, '0');
+        const minutes = String(t.getMinutes()).padStart(2, '0');
+        timeStr = `${hours}:${minutes}`;
+    }
+    
+    // 最終的に有効な "hh:mm" が作れたらセット、ダメならデフォルト値
+    if (timeStr && timeStr !== "NaN:NaN") {
+        document.getElementById("wakeup-time").value = timeStr;
+    } else {
+        document.getElementById("wakeup-time").value = "08:30";
+    }
+} else {
+    document.getElementById("wakeup-time").value = "08:30";
+}
+
             document.getElementById("weight").value = data.weight || "";
             document.getElementById("bodyfat").value = data.bodyfat || "";
             document.getElementById("steps").value = data.steps || "";
@@ -804,7 +795,7 @@
                 const label = document.createElement("label");
                 label.className = `checkbox-item ${isCompletedClass}`;
                 
-                // 【ルール①反映】チェックされたら点数入力フォームを表示
+                // チェックされたら点数入力フォームを表示
                 const pointInputHtml = task.completed 
                     ? `<input type="number" class="pool-task-point-input" value="${task.point || 5}" onchange="updatePoolTaskPoint('${task.id}', this.value)" onclick="event.stopPropagation();"> 点`
                     : `<span style="font-size:0.8rem; color:#94a3b8;">完了時に点数入力</span>`;
@@ -861,198 +852,11 @@
                     task.point = 5;
                 }
             }
-            toggleTaskStyle(checkbox);
-            renderPoolTasks(); // 点数フォームの表示非表示を切り替えるため再描画
-        }
-
-        // 突発タスクの点数をリアルタイム変更
-        function updatePoolTaskPoint(id, val) {
-            const task = currentDayState.urgents.find(t => t.id === id);
-            if (task) {
-                task.point = Number(val) || 0;
-            }
-        }
-
-        // 突発タスクの追加
-        function addUrgentTask() {
-            const input = document.getElementById("new-urgent-input");
-            const text = input.value.trim();
-            if (!text) return;
-
-            currentDayState.urgents.push({
-                id: "msg_" + Date.now(),
-                text: text,
-                type: "urgent",
-                completed: false,
-                point: 0
-            });
-            input.value = "";
+            // 見た目の反映と、突発タスクの場合は点数入力枠の再描画のためにリストをリフレッシュ
             renderPoolTasks();
         }
 
-        // WANTタスクの追加
-        function addWantTask() {
-            const input = document.getElementById("new-want-input");
-            const text = input.value.trim();
-            if (!text) return;
-
-            currentDayState.wants.push({
-                id: "wnt_" + Date.now(),
-                text: text,
-                type: "want",
-                completed: false,
-                point: 0
-            });
-            input.value = "";
-            renderPoolTasks();
-        }
-
-        // ご褒美交換（ショップ機能）
-        function claimReward(rewardName, point) {
-            if (currentDayState.totalPoints < point) {
-                alert(`ポイントが足りません！ (保有: ${currentDayState.totalPoints}pt / 必要: ${point}pt)`);
-                return;
-            }
-            if (confirm(`【ポイント消費】\n「${rewardName} (${point}pt)」と交換しますか？`)) {
-                claimedRewardThisTurn = { text: rewardName, point: point };
-                currentDayState.totalPoints -= point; // 画面上の表示を一時的に減らす
-                document.getElementById("lifepoint-display").innerHTML = `${currentDayState.totalPoints} <span class="lifepoint-unit">pt</span>`;
-                showToast("ご褒美をアンロックしました！登録ボタンを押すと確定保存されます。");
-            }
-        }
-
-        // 【ルール③反映】「登録」ボタンでスプレッドシートへ一括保存
-        async function saveDataToSpreadsheet() {
-            showLoading("スプレッドシートにまとめてデータを送信中...");
-
-            // 1. レギュラータスクデータの収集 ＆ 新規チェック完了の判定
-            const regularsPayload = [];
-            const newlyCompletedRegulars = [];
-
-            document.querySelectorAll(".regular-todo-item").forEach(item => {
-                const taskName = item.dataset.taskname;
-                const point = Number(item.dataset.point);
-                const isChecked = item.checked;
-                const memoInput = document.querySelector(`.regular-task-memo[data-taskname="${taskName}"]`);
-                
-                regularsPayload.push({
-                    taskName: taskName,
-                    completed: isChecked,
-                    memo: memoInput ? memoInput.value.trim() : ""
-                });
-
-                // 前回は未チェックだったのに、今回チェックが入っていればポイント対象
-                if (isChecked && originalRegularsCheckedStatus[taskName] === false) {
-                    newlyCompletedRegulars.push({ taskName: taskName, point: point });
-                }
-            });
-
-            // 2. 送信データの組み立て
-            const payload = {
-                dailyLog: {
-                    wakeupTime: document.getElementById("wakeup-time").value,
-                    weight: document.getElementById("weight").value,
-                    bodyfat: document.getElementById("bodyfat").value,
-                    steps: document.getElementById("steps").value,
-                    condition: document.getElementById("condition-select").value,
-                    conditionMemo: document.getElementById("condition-memo").value,
-                    slogan: document.getElementById("slogan-display").innerText,
-                    diaryMemo: document.getElementById("diary-memo").value
-                },
-                regulars: regularsPayload,
-                newlyCompletedRegulars: newlyCompletedRegulars, // 新規得点用
-                urgents: currentDayState.urgents,
-                wants: currentDayState.wants,
-                claimedReward: claimedRewardThisTurn // ご褒美消費用
-            };
-
-            // 3. GASにPOST送信
-            try {
-                const response = await fetch(GAS_WEB_APP_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        date: currentTargetDateStr,
-                        action: "save",
-                        payload: payload
-                    })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    showToast("スプシと完全同期しました！");
-                    // 最新の状態を再ロードして、ポイントなどを再計算する
-                    await loadPage(currentTargetDateStr);
-                } else {
-                    alert("保存エラー: " + result.error);
-                }
-            } catch (e) {
-                console.error(e);
-                alert("スプシへの保存に失敗しました。ネット環境やGASのURLを確認してください。");
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // その他の画面処理（スローガン、日付移動など）
-        function toggleSloganEdit() {
-            const display = document.getElementById("slogan-display");
-            const form = document.getElementById("slogan-edit-form");
-            const btn = document.getElementById("btn-edit-slogan");
-            if (form.style.display === "flex") {
-                form.style.display = "none"; display.style.display = "block"; btn.innerText = "更新する";
-            } else {
-                form.style.display = "flex"; display.style.display = "none"; btn.innerText = "キャンセル";
-            }
-        }
-        function saveSlogan() {
-            document.getElementById("slogan-display").innerText = document.getElementById("slogan-input").value;
-            toggleSloganEdit();
-        }
-        function moveDate(offset) {
-            const d = new Date(currentTargetDateStr);
-            d.setDate(d.getDate() + offset);
-            loadPage(formatDateKey(d));
-        }
-        function onDatePickerChange(picker) {
-            if (picker.value) loadPage(picker.value);
-        }
-        function jumpToToday() {
-            const now = new Date();
-            loadPage(formatDateKey(getAM5AdjustedDate(now)));
-        }
-        function setNowTime() {
-            const now = new Date();
-            document.getElementById('wakeup-time').value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-        }
-        function showToast(msg) {
-            const toast = document.getElementById("toast");
-            toast.innerText = msg; toast.style.display = "block";
-            setTimeout(() => { toast.style.display = "none"; }, 2500);
-        }
-
-        // クリップボードコピー
-        function copyToClipboard() {
-            const dateStr = getDisplayDateString(currentTargetDateStr);
-            const wakeup = document.getElementById("wakeup-time").value;
-            const weight = document.getElementById("weight").value || "--";
-            const fat = document.getElementById("bodyfat").value || "--";
-            const steps = document.getElementById("steps").value || "0";
-            const condSelect = document.getElementById("condition-select");
-            const condStars = condSelect.options[condSelect.selectedIndex].text.split(" ")[0];
-            const condMemo = document.getElementById("condition-memo").value;
-            const slogan = document.getElementById("slogan-display").innerText;
-            const diary = document.getElementById("diary-memo").value || "(なし)";
-
-            let text = `【${dateStr} のジャーナル】\n`;
-            text += `🎯 今日のスローガン: ${slogan}\n`;
-            text += `⏰ 起床時間: ${wakeup}\n`;
-            text += `🏃 身体データ: 体重 ${weight}kg / 体脂肪 ${fat}% / 歩数 ${steps}歩\n`;
-            text += `😊 体調: ${condStars} ${condMemo ? `(${condMemo})` : ''}\n\n`;
-            text += `📝 ひとこと日記:\n${diary}\n`;
-
-            navigator.clipboard.writeText(text).then(() => showToast("クリップボードにコピーしました！"));
-        }
-
-        // アプリ起動
+        // ページ読み込み時に初期化を実行
         window.addEventListener("DOMContentLoaded", initApp);
     </script>
 </body>
