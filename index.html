@@ -613,7 +613,7 @@
          ================================================== -->
     <script>
         // ⚠️【最重要】ここにGASでデプロイした「ウェブアプリのURL」を貼り付けてください！
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzegB52gszaE9hjwvaPZ0K0YiEuaMFn50gLYd4sT07pdHhkini5xWlCFcQP5dC_n5tz/exec';
+        const GAS_WEB_APP_URL = 'ここにコピーしたウェブアプリのURLを貼り付ける';
 
         // アプリ内状態管理変数
         let currentTargetDateStr = "";
@@ -712,7 +712,17 @@
             const data = currentDayState.dailyLog || {};
             
             // 基本ステータス
-            document.getElementById("wakeup-time").value = data.wakeupTime || "08:30";
+            if (data.wakeupTime) {
+                  // スプシから届く「7:50:00」や日付オブジェクトを「07:50」の形式に綺麗に整える
+                  //   const t = new Date(data.wakeupTime);
+                  //   if (!isNaN(t.getTime())) {
+                  //     document.getElementById("wakeup-time").value = `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
+                  //   } else if (typeof data.wakeupTime === "string") {
+                  //     document.getElementById("wakeup-time").value = data.wakeupTime.substring(0, 5);
+                    }
+                } else {
+                      document.getElementById("wakeup-time").value = "08:30";
+                    }
             document.getElementById("weight").value = data.weight || "";
             document.getElementById("bodyfat").value = data.bodyfat || "";
             document.getElementById("steps").value = data.steps || "";
