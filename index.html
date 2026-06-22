@@ -913,7 +913,7 @@
 
             showLoading("スプレッドシートに保存中...");
 
-            // 画面の入力値をcurrentDayStateに収集
+            // 1. 画面の入力値を収集
             const dailyLog = {
                 date: currentTargetDateStr,
                 wakeupTime: document.getElementById("wakeup-time").value,
@@ -926,34 +926,62 @@
                 diaryMemo: document.getElementById("diary-memo").value
             };
 
-            // レギュラータスクの状態を収集
+            // 2. レギュラータスクの状態を収集
             const regulars = [];
+            const newlyCompletedRegulars = []; // 新しくチェックがついたタスク（GAS側のポイント用）
+            
             const regElements = document.querySelectorAll(".regular-todo-item");
             regElements.forEach(el => {
                 const taskName = el.dataset.taskname;
+                const point = parseInt(el.dataset.point) || 0;
                 const memoEl = document.querySelector(`.regular-task-memo[data-taskname="${taskName}"]`);
+                const isChecked = el.checked;
+
                 regulars.push({
                     taskName: taskName,
-                    completed: el.checked,
+                    completed: isChecked,
                     memo: memoEl ? memoEl.value : ""
                 });
+
+                // 前回未チェックで、今回チェックが入った場合
+                if (isChecked && !originalRegularsCheckedStatus[taskName]) {
+                    newlyCompletedRegulars.push({
+                        taskName: taskName,
+                        point: point
+                    });
+                }
             });
 
-            // 送信データの組み立て
-            const payload = {
-                date: currentTargetDateStr,
+            // 3. ご褒美データのフォーマットをGASに合わせる (textとpoint)
+            let formattedReward = null;
+            if (claimedRewardThisTurn) {
+                formattedReward = {
+                    text: claimedRewardThisTurn.name,
+                    point: claimedRewardThisTurn.cost
+                };
+            }
+
+            // 4. GAS側の要求（action, date, payload）に合わせてデータを組み立て
+            const payloadData = {
                 dailyLog: dailyLog,
                 regulars: regulars,
                 urgents: currentDayState.urgents || [],
                 wants: currentDayState.wants || [],
-                claimedReward: claimedRewardThisTurn
+                newlyCompletedRegulars: newlyCompletedRegulars,
+                claimedReward: formattedReward
+            };
+
+            const httpBody = {
+                action: "save", // ← GASの if(action === "save") を通すために必須
+                date: currentTargetDateStr,
+                payload: payloadData // ← GASの postData.payload を通すために必須
             };
 
             try {
                 // GASのdoPostにデータを送信
                 const response = await fetch(GAS_WEB_APP_URL, {
                     method: "POST",
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(httpBody)
                 });
                 const result = await response.json();
 
