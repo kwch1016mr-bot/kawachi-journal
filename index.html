@@ -652,7 +652,7 @@
             await loadPage(formatDateKey(adjusted));
         }
 
-        // 特定日付のデータロード
+        // 特定日付 of データロード
         async function loadPage(dateStr) {
             currentTargetDateStr = dateStr;
             document.getElementById("date-display").innerText = getDisplayDateString(dateStr);
@@ -892,7 +892,7 @@
             });
         }
 
-        // ★【大改修】登録ボタンの通信処理（超高速化対応版）
+        // 登録ボタンの通信処理（エラー回避・安定版）
         async function saveDataToSpreadsheet() {
             if (!currentTargetDateStr) return;
 
@@ -957,9 +957,16 @@
                 if (result.success) {
                     showToast("スプレッドシートに保存しました！");
                     
-                    // 【高速化の工夫】再ロード（loadPage）を呼ぶのをやめ、GASから返ってきた最新ポイントをその場で即反映！
-                    currentDayState.totalPoints = result.totalPoints;
-                    document.getElementById("lifepoint-display").innerHTML = `${result.totalPoints} <span class="lifepoint-unit">pt</span>`;
+                    // VS Codeのエラーを回避するため、変数名をアルファベットに変更
+                    const latestPoints = result.totalPoints !== undefined ? result.totalPoints : result.totalpoints;
+                    
+                    if (latestPoints !== undefined) {
+                        currentDayState.totalPoints = latestPoints;
+                        document.getElementById("lifepoint-display").innerHTML = `${latestPoints} <span class="lifepoint-unit">pt</span>`;
+                    } else {
+                        console.warn("GASからポイントが戻らなかったため、再同期します");
+                        await loadPage(currentTargetDateStr);
+                    }
                     
                     // 保存が確定したので、現在の状態を「初期状態」として再セット
                     regulars.forEach(r => { originalRegularsCheckedStatus[r.taskName] = r.completed; });
