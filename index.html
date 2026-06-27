@@ -586,14 +586,14 @@
     <div class="toast-message" id="toast">保存しました</div>
 
     <script>
-        // ⚠️【最重要】ここにGASでデプロイした「ウェブアプリのURL」を貼り付けてください！
+        // ⚠️【最重要】ここにGASでデプロイした「新しいウェブアプリのURL」を貼り付けてください！
         const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzegB52gszaE9hjwvaPZ0K0YiEuaMFn50gLYd4sT07pdHhkini5xWlCFcQP5dC_n5tz/exec';
 
         // アプリ内状態管理変数
         let currentTargetDateStr = "";
         let regularTaskMasters = []; // スプシから読み込んだマスタ
         let currentDayState = {};    // スプシから読み込んだその日の実績データ
-        let originalRegularsCheckedStatus = {}; // 初期のチェック状態（新しくチェックがついたか判定用）
+        let originalRegularsCheckedStatus = {}; // 初期のチェック状態
         let claimedRewardThisTurn = null; // このセッションで交換したご褒美
 
         // 5時調整（生活リズム合わせ）
@@ -635,7 +635,6 @@
 
             showLoading("マスタデータを読み込み中...");
             try {
-                // 1. レギュラータスクマスタの取得
                 const response = await fetch(`${GAS_WEB_APP_URL}?action=init&date=2026-01-01`);
                 const result = await response.json();
                 if (result.success) {
@@ -648,7 +647,6 @@
                 alert("GASとの通信に失敗しました。URLやデプロイ設定（全員に公開）を確認してください。");
             }
 
-            // 2. 今日（AM5時調整）のページをロード
             const now = new Date();
             const adjusted = getAM5AdjustedDate(now);
             await loadPage(formatDateKey(adjusted));
@@ -688,7 +686,7 @@
             await loadPage(formatDateKey(current));
         }
 
-        // カレンダー（デートピッカー）で日付が選択されたとき
+        // カレンダーで日付が選択されたとき
         async function onDatePickerChange(picker) {
             if (picker.value) {
                 await loadPage(picker.value);
@@ -706,7 +704,6 @@
         function renderPageForm() {
             const data = currentDayState.dailyLog || {};
             
-            // 起床時間の復元処理
             let formattedTime = "08:30";
             if (data.wakeupTime) {
                 const t = new Date(data.wakeupTime);
@@ -723,7 +720,6 @@
             }
             
             document.getElementById("wakeup-time").value = formattedTime;
-
             document.getElementById("weight").value = data.weight || "";
             document.getElementById("bodyfat").value = data.bodyfat || "";
             document.getElementById("steps").value = data.steps || "";
@@ -792,7 +788,6 @@
             urgentListContainer.innerHTML = "";
             wantListContainer.innerHTML = "";
 
-            // 突発タスク
             currentDayState.urgents.forEach(task => {
                 const isChecked = task.completed ? "checked" : "";
                 const isCompletedClass = task.completed ? "completed" : "";
@@ -816,7 +811,6 @@
                 urgentListContainer.appendChild(label);
             });
 
-            // WANTリスト
             currentDayState.wants.forEach(task => {
                 const isChecked = task.completed ? "checked" : "";
                 const isCompletedClass = task.completed ? "completed" : "";
@@ -835,7 +829,6 @@
             });
         }
 
-        // チェックボックスの見た目切り替え
         function toggleTaskStyle(checkbox) {
             const item = checkbox.closest('.checkbox-item');
             if (checkbox.checked) {
@@ -845,7 +838,6 @@
             }
         }
 
-        // 突発・WANTのチェック切り替え
         function togglePoolTaskStatus(id, type, checkbox) {
             const list = type === "urgent" ? currentDayState.urgents : currentDayState.wants;
             const task = list.find(t => t.id === id);
@@ -858,7 +850,6 @@
             renderPoolTasks();
         }
 
-        // 💡 トースト表示用の簡易関数
         function showToast(message) {
             const toast = document.getElementById("toast");
             toast.innerText = message;
@@ -866,11 +857,6 @@
             setTimeout(() => { toast.style.display = "none"; }, 2000);
         }
 
-        /* --------------------------------------------------
-         * 🛠️ 【ここから新規追加・バグ修正用の関数群】
-         * -------------------------------------------------- */
-
-        // ③ 「現在時刻」ボタン：今の時間を「HH:MM」形式でセットする
         function setNowTime() {
             const now = new Date();
             const hh = String(now.getHours()).padStart(2, '0');
@@ -879,7 +865,6 @@
             showToast("現在時刻をセットしました");
         }
 
-        // ② 「コピー」ボタン：現在のログをいい感じのテキストにしてクリップボードにコピー
         function copyToClipboard() {
             const dateText = document.getElementById("date-display").innerText;
             const wakeup = document.getElementById("wakeup-time").value;
@@ -907,13 +892,12 @@
             });
         }
 
-        // ① 「登録（スプシ保存）」ボタン：現在のフォーム内容をオブジェクトにまとめてGASへ送信
+        // ★【大改修】登録ボタンの通信処理（超高速化対応版）
         async function saveDataToSpreadsheet() {
             if (!currentTargetDateStr) return;
 
             showLoading("スプレッドシートに保存中...");
 
-            // 1. 画面の入力値を収集
             const dailyLog = {
                 date: currentTargetDateStr,
                 wakeupTime: document.getElementById("wakeup-time").value,
@@ -926,9 +910,8 @@
                 diaryMemo: document.getElementById("diary-memo").value
             };
 
-            // 2. レギュラータスクの状態を収集
             const regulars = [];
-            const newlyCompletedRegulars = []; // 新しくチェックがついたタスク（GAS側のポイント用）
+            const newlyCompletedRegulars = [];
             
             const regElements = document.querySelectorAll(".regular-todo-item");
             regElements.forEach(el => {
@@ -943,25 +926,16 @@
                     memo: memoEl ? memoEl.value : ""
                 });
 
-                // 前回未チェックで、今回チェックが入った場合
                 if (isChecked && !originalRegularsCheckedStatus[taskName]) {
-                    newlyCompletedRegulars.push({
-                        taskName: taskName,
-                        point: point
-                    });
+                    newlyCompletedRegulars.push({ taskName: taskName, point: point });
                 }
             });
 
-            // 3. ご褒美データのフォーマットをGASに合わせる (textとpoint)
             let formattedReward = null;
             if (claimedRewardThisTurn) {
-                formattedReward = {
-                    text: claimedRewardThisTurn.name,
-                    point: claimedRewardThisTurn.cost
-                };
+                formattedReward = { text: claimedRewardThisTurn.name, point: claimedRewardThisTurn.cost };
             }
 
-            // 4. GAS側の要求（action, date, payload）に合わせてデータを組み立て
             const payloadData = {
                 dailyLog: dailyLog,
                 regulars: regulars,
@@ -971,14 +945,9 @@
                 claimedReward: formattedReward
             };
 
-            const httpBody = {
-                action: "save", // ← GASの if(action === "save") を通すために必須
-                date: currentTargetDateStr,
-                payload: payloadData // ← GASの postData.payload を通すために必須
-            };
+            const httpBody = { action: "save", date: currentTargetDateStr, payload: payloadData };
 
             try {
-                // GASのdoPostにデータを送信
                 const response = await fetch(GAS_WEB_APP_URL, {
                     method: "POST",
                     body: JSON.stringify(httpBody)
@@ -987,8 +956,14 @@
 
                 if (result.success) {
                     showToast("スプレッドシートに保存しました！");
-                    // 最新のポイントなどを再反映させるため再ロード
-                    await loadPage(currentTargetDateStr);
+                    
+                    // 【高速化の工夫】再ロード（loadPage）を呼ぶのをやめ、GASから返ってきた最新ポイントをその場で即反映！
+                    currentDayState.totalPoints = result.totalPoints;
+                    document.getElementById("lifepoint-display").innerHTML = `${result.totalPoints} <span class="lifepoint-unit">pt</span>`;
+                    
+                    // 保存が確定したので、現在の状態を「初期状態」として再セット
+                    regulars.forEach(r => { originalRegularsCheckedStatus[r.taskName] = r.completed; });
+                    claimedRewardThisTurn = null; 
                 } else {
                     alert("保存エラー: " + result.error);
                 }
@@ -1000,17 +975,11 @@
             }
         }
 
-        // 【その他補完機能】突発タスク追加
         function addUrgentTask() {
             const input = document.getElementById("new-urgent-input");
             if (!input.value.trim()) return;
             
-            const newTask = {
-                id: "u_" + Date.now(),
-                text: input.value.trim(),
-                completed: false,
-                point: 5
-            };
+            const newTask = { id: "u_" + Date.now(), text: input.value.trim(), completed: false, point: 5 };
             if(!currentDayState.urgents) currentDayState.urgents = [];
             currentDayState.urgents.push(newTask);
             input.value = "";
@@ -1018,16 +987,11 @@
             showToast("突発タスクを追加しました（保存ボタンで確定）");
         }
 
-        // 【その他補完機能】WANTタスク追加
         function addWantTask() {
             const input = document.getElementById("new-want-input");
             if (!input.value.trim()) return;
 
-            const newTask = {
-                id: "w_" + Date.now(),
-                text: input.value.trim(),
-                completed: false
-            };
+            const newTask = { id: "w_" + Date.now(), text: input.value.trim(), completed: false };
             if(!currentDayState.wants) currentDayState.wants = [];
             currentDayState.wants.push(newTask);
             input.value = "";
@@ -1035,15 +999,11 @@
             showToast("WANTリストに追加しました（保存ボタンで確定）");
         }
 
-        // 【その他補完機能】突発タスクの点数更新
         function updatePoolTaskPoint(id, val) {
             const task = currentDayState.urgents.find(t => t.id === id);
-            if (task) {
-                task.point = parseInt(val) || 0;
-            }
+            if (task) { task.point = parseInt(val) || 0; }
         }
 
-        // 【その他補完機能】スローガンの編集切り替え
         function toggleSloganEdit() {
             const textEl = document.getElementById("slogan-display");
             const formEl = document.getElementById("slogan-edit-form");
@@ -1058,7 +1018,6 @@
             }
         }
 
-        // 【その他補完機能】スローガンの決定
         function saveSlogan() {
             const inputVal = document.getElementById("slogan-input").value;
             document.getElementById("slogan-display").innerText = inputVal;
@@ -1066,7 +1025,6 @@
             showToast("スローガンを変更しました（保存ボタンで確定）");
         }
 
-        // 【その他補完機能】ご褒美の交換
         function claimReward(rewardName, cost) {
             if (currentDayState.totalPoints < cost) {
                 alert(`ポイントが足りません！ (保有: ${currentDayState.totalPoints}pt / 必要: ${cost}pt)`);
@@ -1078,7 +1036,6 @@
             }
         }
 
-        // ページ読み込み時に初期化を実行
         window.addEventListener("DOMContentLoaded", initApp);
     </script>
 </body>
